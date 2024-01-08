@@ -35,7 +35,6 @@ class _DashboardFull extends State<DashboardFull> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getAkun();
   }

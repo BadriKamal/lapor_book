@@ -17,10 +17,11 @@ class AddFormPage extends StatefulWidget {
 }
 
 class AddFormState extends State<AddFormPage> {
-  bool _isLoading = false;
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
   final _storage = FirebaseStorage.instance;
+  bool _isLoading = false;
+
   String? judul;
   String? instansi;
   String? deskripsi;
@@ -29,7 +30,8 @@ class AddFormState extends State<AddFormPage> {
   XFile? file;
   Image imagePreview() {
     if (file == null) {
-      return Image.asset('assets/istock-default.png', width: 180, height: 180);
+      return Image.asset('lib/assets/istock-default.png',
+          width: 180, height: 180);
     } else {
       return Image.file(File(file!.path), width: 180, height: 180);
     }
@@ -72,24 +74,6 @@ class AddFormState extends State<AddFormPage> {
         });
   }
 
-  Future<String> uploadImage() async {
-    if (file == null) return '';
-
-    String uniqueFilename = DateTime.now().millisecondsSinceEpoch.toString();
-
-    try {
-      Reference dirUpload =
-          _storage.ref().child('upload/${_auth.currentUser!.uid}');
-      Reference storedDir = dirUpload.child(uniqueFilename);
-
-      await storedDir.putFile(File(file!.path));
-
-      return await storedDir.getDownloadURL();
-    } catch (e) {
-      return '';
-    }
-  }
-
   Future<Position> getCurrentLocation() async {
     bool isServiceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!isServiceEnabled) {
@@ -111,6 +95,24 @@ class AddFormState extends State<AddFormPage> {
     }
 
     return await Geolocator.getCurrentPosition();
+  }
+
+  Future<String> uploadImage() async {
+    if (file == null) return '';
+
+    String uniqueFilename = DateTime.now().millisecondsSinceEpoch.toString();
+
+    try {
+      Reference dirUpload =
+          _storage.ref().child('upload/${_auth.currentUser!.uid}');
+      Reference storedDir = dirUpload.child(uniqueFilename);
+
+      await storedDir.putFile(File(file!.path));
+
+      return await storedDir.getDownloadURL();
+    } catch (e) {
+      return '';
+    }
   }
 
   void addTransaksi(Akun akun) async {
@@ -184,7 +186,9 @@ class AddFormState extends State<AddFormPage> {
                         InputLayout(
                             'Judul Laporan',
                             TextFormField(
-                                onChanged: (value) => {},
+                                onChanged: (String value) => setState(() {
+                                      judul = value;
+                                    }),
                                 validator: notEmptyValidator,
                                 decoration:
                                     customInputDecoration("Judul laporan"))),
@@ -224,7 +228,9 @@ class AddFormState extends State<AddFormPage> {
                         InputLayout(
                             "Deskripsi laporan",
                             TextFormField(
-                              onChanged: (value) => {},
+                              onChanged: (String value) => setState(() {
+                                deskripsi = value;
+                              }),
                               keyboardType: TextInputType.multiline,
                               minLines: 3,
                               maxLines: 5,
@@ -236,7 +242,9 @@ class AddFormState extends State<AddFormPage> {
                           width: double.infinity,
                           child: FilledButton(
                               style: buttonStyle,
-                              onPressed: () {},
+                              onPressed: () {
+                                addTransaksi(akun);
+                              },
                               child: Text(
                                 'Kirim Laporan',
                                 style: headerStyle(level: 3, dark: false),
